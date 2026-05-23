@@ -11,7 +11,7 @@ class BaseEvolutionAPI:
         }
 
     def _send_request(self, path, method='GET', body=None, headers={}, params_url={}):
-        method.upper()
+        method = method.upper()
         url = self._mount_url(path, params_url)
 
         if not isinstance(headers, dict):
@@ -31,6 +31,7 @@ class BaseEvolutionAPI:
         return request(url, headers=headers, json=body)
 
     def _mount_url(self, path, params_url):
+        parameters = ''
         if isinstance(params_url, dict):
             parameters = urlencode(params_url)
 

@@ -1,7 +1,5 @@
 from pathlib import Path
 from abc import abstractmethod
-import datetime
-
 import httpx
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
@@ -16,7 +14,6 @@ from agno.tools.googlecalendar import GoogleCalendarTools
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from django.conf import settings
-from tzlocal import get_localzone_name
 
 from prompts.prompt import SUMMARY_PROMPT, EXAM_ANALYSIS_PROMPT
 from .tools import search_adverse_veterinary_events
@@ -144,7 +141,8 @@ class AssistantAgent:
     )
 
     @classmethod
-    def build_agent(cls, knowledge_filters: dict = {}, session_id: int = 0) -> Agent:
+    def build_agent(cls, knowledge_filters: dict | None = None, session_id: int = 0) -> Agent:
+        knowledge_filters = knowledge_filters or {}
         db = SqliteDb(
             db_file=cls.MEMORY_DB_FILE,
             memory_table=cls.MEMORY_TABLE
@@ -174,7 +172,7 @@ class SecretaryAI:
     MEMORY_DB_FILE = "db.sqlite3"
     MEMORY_TABLE = "secretary_memory_table"
 
-    INSTRUCTIONS = f"""
+    INSTRUCTIONS = """
     Você é a secretária virtual de um hospital veterinário. Seu papel é agendar consultas para possíveis pacientes.
     SUAS CAPACIDADES:
 
@@ -208,13 +206,11 @@ class SecretaryAI:
     3. Para informações: consulte a base de conhecimento e responda
     4. Para agendamento: verifique disponibilidade e agende entre 11h-18h
     5. Confirme todas as informações antes de finalizar
-
-    Data e hora atual: {datetime.datetime.now()}
-    Fuso horário: {get_localzone_name()}
     """
 
     @classmethod
-    def build_agent(cls, knowledge_filters: dict = {}, session_id: int = 1) -> Agent:
+    def build_agent(cls, knowledge_filters: dict | None = None, session_id: int = 1) -> Agent:
+        knowledge_filters = knowledge_filters or {}
         db = SqliteDb(
             db_file=cls.MEMORY_DB_FILE,
             memory_table=cls.MEMORY_TABLE

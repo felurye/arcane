@@ -81,6 +81,8 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+LOGIN_URL = 'login'
+
 OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
 
 Q_CLUSTER = {

@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.messages import constants
 from django.contrib import messages, auth
 from django.contrib.auth import authenticate
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, StreamingHttpResponse
@@ -56,6 +57,7 @@ def login(request):
             return redirect('login')
 
 
+@login_required
 def clients(request):
     if request.method == 'GET':
         species_filter = request.GET.get('tipo')
@@ -91,6 +93,7 @@ def clients(request):
         return redirect('clients')
 
 
+@login_required
 def patient(request, pk):
     if request.method == 'GET':
         client = get_object_or_404(Client, pk=pk)
@@ -107,6 +110,7 @@ def patient(request, pk):
         return redirect('patient', pk)
 
 
+@login_required
 def appointment(request, pk):
     appointment_obj = get_object_or_404(Appointment.objects.select_related('client'), pk=pk)
     return render(
@@ -120,6 +124,7 @@ def appointment(request, pk):
 
 
 @csrf_exempt
+@login_required
 def chat(request, pk):
     client = get_object_or_404(Client, pk=pk)
     if request.method == 'GET':
@@ -144,6 +149,7 @@ def chat(request, pk):
 
 
 @csrf_exempt
+@login_required
 def triage(request, client_id):
     heart_rate = request.POST.get('heart_rate')
     respiratory_rate = request.POST.get('respiratory_rate')
@@ -164,6 +170,7 @@ def triage(request, client_id):
 
 
 @csrf_exempt
+@login_required
 def stream_response(request):
     question_id = request.POST.get('question_id')
     question = get_object_or_404(Question, id=question_id)
@@ -197,6 +204,7 @@ def stream_response(request):
     return response
 
 
+@login_required
 def sources(request, pk):
     question = get_object_or_404(Question.objects.select_related('client'), pk=pk)
     contexts = RagContext.objects.filter(question=question).order_by('id')
