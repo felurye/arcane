@@ -1,0 +1,11 @@
+django
+agno
+openai
+docling
+langchain
+langchain-openai
+django-q2
+python-decouple
+lancedb
+sqlalchemy
+tzlocal
