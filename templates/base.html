@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>PetCare</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+              rel="stylesheet">
+        {% block extra_head %}{% endblock %}
+    </head>
+    <body>
+        {% block layout %}
+            <div class="app">
+                {% block navbar %}{% endblock %}
+                {% block content %}{% endblock %}
+            </div>
+        {% endblock %}
+        {% block extra_scripts %}{% endblock %}
+        <script>
+            function openSidebar() {
+                document.body.classList.add("sidebar-open");
+            }
+            function closeSidebar() {
+                document.body.classList.remove("sidebar-open");
+            }
+        </script>
+    </body>
+</html>

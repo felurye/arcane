@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'users/css/clientes.css' %}">
+    <link rel="stylesheet" href="{% static 'users/css/consulta.css' %}">
+{% endblock %}
+
+{% block navbar %}
+    {% include "partials/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<main>
+    <div class="topbar">
+        <button class="icon-btn mobile-nav-btn" type="button" aria-label="Abrir menu" onclick="openSidebar()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+        <div class="crumbs">
+            <a href="{% url 'clientes' %}">Clinica</a> <span class="sep">/</span>
+            <a href="{% url 'clientes' %}">Clientes</a> <span class="sep">/</span>
+            <a href="{% url 'paciente' cliente.pk %}">{{ cliente.nome_animal|default:"Paciente" }}</a> <span class="sep">/</span>
+            <span class="here">Consulta · {{ consulta.data|date:"d M Y" }}</span>
+        </div>
+    </div>
+
+    <header class="head consult-head-simple">
+        <div class="head-info">
+            <h1>Consulta <em>· {{ consulta.data|date:"d/m/Y" }}</em>.</h1>
+        </div>
+    </header>
+
+    <div class="body-grid">
+        <div class="body-grid-main">
+            <div class="video-wrap">
+                <div class="video-frame {% if consulta.video %}has-video{% endif %}">
+                    {% if consulta.video %}
+                        <video class="absolute inset-0 h-full w-full object-cover bg-black"
+                               controls preload="metadata" playsinline
+                               src="{{ consulta.video.url }}">
+                            Seu navegador nao suporta reproducao de video.
+                        </video>
+                    {% endif %}
+                </div>
+            </div>
+
+            <article class="card" style="margin-bottom:24px">
+                <div class="card-head">
+                    <div>
+                        <h2>Transcricao <em>resumida</em> por IA.</h2>
+                    </div>
+                </div>
+                <div class="consult-resumo">
+                    {% if consulta.resumo %}
+                        {{ consulta.resumo|linebreaks }}
+                    {% else %}
+                        <p class="consult-empty">Resumo ainda nao disponivel.</p>
+                    {% endif %}
+                </div>
+            </article>
+
+            <article class="card analysis">
+                <div class="card-head">
+                    <div>
+                        <span class="card-eyebrow">Analise dos exames</span>
+                        <h2>Exames <em>anexados</em>.</h2>
+                    </div>
+                </div>
+                {% if consulta.analise_exames %}
+                    <div class="analysis-banners">
+                        {% for topico in consulta.analise_exames %}
+                            <div class="analysis-banner">
+                                <span class="analysis-banner-num">{{ forloop.counter }}</span>
+                                <p class="analysis-banner-text">{{ topico }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="consult-empty">Analise dos exames ainda nao disponivel.</p>
+                {% endif %}
+            </article>
+        </div>
+
+        <aside class="side">
+            <article class="card">
+                <div class="card-head">
+                    <div>
+                        <span class="card-eyebrow">Anexos</span>
+                        <h2>Exames <em>anexados</em>.</h2>
+                    </div>
+                </div>
+                {% if consulta.pdf %}
+                    <a class="exam" href="{{ consulta.pdf.url }}" target="_blank" rel="noopener">
+                        <div class="ico">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                                <text x="7" y="17" font-size="6" font-family="monospace" font-weight="700" fill="currentColor">PDF</text>
+                            </svg>
+                        </div>
+                        <div class="nm">
+                            {{ consulta.pdf.name }}
+                            <small>PDF · abrir arquivo</small>
+                        </div>
+                        <span class="dl" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                        </span>
+                    </a>
+                {% else %}
+                    <p class="consult-empty">Nenhum exame em PDF anexado.</p>
+                {% endif %}
+            </article>
+
+            {% if consulta.observacao %}
+                <article class="card">
+                    <div class="card-head">
+                        <div>
+                            <span class="card-eyebrow">Prontuario</span>
+                            <h2>Observacoes <em>clinicas</em>.</h2>
+                        </div>
+                    </div>
+                    <p style="margin:0;font-size:14px;line-height:1.55;color:var(--ink-soft)">{{ consulta.observacao|linebreaks }}</p>
+                </article>
+            {% endif %}
+        </aside>
+    </div>
+</main>
+{% endblock %}

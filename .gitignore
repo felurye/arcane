@@ -95,3 +95,4 @@ ehthumbs.db
 
 # Agents
 .claude/settings.local.json
+bash.exe.stackdump

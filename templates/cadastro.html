@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'users/css/login.css' %}">
+{% endblock %}
+
+{% block layout %}
+    <main class="page">
+        <aside class="hero">
+            <div class="hero-img"></div>
+            <div class="swoosh"></div>
+            <div class="hero-frame"></div>
+            <div class="hero-top">
+                <a class="brand" href="#"><span class="glyph"></span> petcare<span class="wm-dot">.</span></a>
+            </div>
+            <div class="hero-bottom">
+                <p class="hero-quote">
+                    Cuide dos seus pacientes com um painel <em>simples</em> e rapido.
+                </p>
+            </div>
+        </aside>
+        <section class="form-side">
+            <div class="form-wrap">
+                <a class="form-lockup" href="#" aria-label="petcare">
+                    <span class="glyph"></span>
+                    <span>petcare<span class="wm-dot">.</span></span>
+                </a>
+                <h1 class="title">
+                    Crie sua <em>conta</em>.
+                </h1>
+                {% if messages %}
+                    {% for message in messages %}<div class="mb-6 rounded-xl p-4 {{ message.tags }}">{{ message }}</div>{% endfor %}
+                {% endif %}
+                <form method="post" action="{% url 'cadastro' %}">{% csrf_token %}
+                    <div class="field">
+                        <label for="username">Nome de usuario</label>
+                        <div class="input-wrap">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                <circle cx="12" cy="8" r="3.6" />
+                                <path d="M4.5 19a7.5 7.5 0 0 1 15 0" />
+                            </svg>
+                            <input id="username" name="username" type="text" placeholder="seu.usuario" autocomplete="username" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="password">Senha</label>
+                        <div class="input-wrap">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                <rect x="4" y="11" width="16" height="10" rx="2" />
+                                <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                            </svg>
+                            <input id="password" name="senha" type="password" placeholder="**********" autocomplete="new-password" required>
+                            <button type="button" class="toggle" data-target="password" aria-label="Mostrar senha">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                    <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="confirm_password">Confirmar senha</label>
+                        <div class="input-wrap">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                <rect x="4" y="11" width="16" height="10" rx="2" />
+                                <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                            </svg>
+                            <input id="confirm_password" name="confirmar_senha" type="password" placeholder="**********" autocomplete="new-password" required>
+                            <button type="button" class="toggle" data-target="confirm_password" aria-label="Mostrar senha">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                    <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit">Criar conta</button>
+                </form>
+                <p class="footnote">
+                    Ja possui conta?
+                    <a href="{% url 'login' %}">Entrar na plataforma -></a>
+                </p>
+            </div>
+        </section>
+    </main>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        document.querySelectorAll(".toggle").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                const input = document.getElementById(btn.dataset.target);
+                const isPassword = input.type === "password";
+                input.type = isPassword ? "text" : "password";
+                btn.setAttribute("aria-label", isPassword ? "Ocultar senha" : "Mostrar senha");
+            });
+        });
+    </script>
+{% endblock %}

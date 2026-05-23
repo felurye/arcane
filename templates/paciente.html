@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'users/css/clientes.css' %}">
+    <link rel="stylesheet" href="{% static 'users/css/paciente.css' %}">
+{% endblock %}
+
+{% block navbar %}
+    {% include "partials/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+    <main>
+        <div class="topbar">
+            <button class="icon-btn mobile-nav-btn" type="button" aria-label="Abrir menu" onclick="openSidebar()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 7h16M4 12h16M4 17h16" />
+                </svg>
+            </button>
+            <div class="crumbs">
+                <a href="{% url 'clientes' %}">Clinica</a> <span class="sep">/</span>
+                <a href="{% url 'clientes' %}">Clientes</a> <span class="sep">/</span>
+                <span class="here">{{ cliente.nome_animal|default:"Paciente" }}</span>
+            </div>
+        </div>
+        <header class="hero">
+            <div class="hero-l">
+                <div class="avt-big">{{ cliente.nome_animal|slice:":1"|upper|default:"P" }}</div>
+                <div class="hero-info">
+                    <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--clay)">
+                        Paciente · PET-{{ cliente.id }}
+                    </div>
+                    <h1>
+                        {{ cliente.nome_animal }} <em>{{ cliente.nome }}</em>
+                    </h1>
+                    <div class="pet-meta">
+                        <span class="meta-chip">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                <path d="M4 11c0-3 1.5-5 3-5 1 0 2 .5 2.5 1.5C10.5 6 11.7 5 13 5s2.5 1 3 2.5C16.5 6.5 17.5 6 18.5 6c1.5 0 3 2 3 5 0 4-2 6-4 7v3h-2v-2H9v2H7v-3c-2-1-3-3-3-7Z" />
+                            </svg>
+                            {{ cliente.get_especie_display }} {{ cliente.raca }}
+                        </span>
+                        {% if cliente.idade %}<span class="meta-chip">{{ cliente.idade }} anos</span>{% endif %}
+                        {% if cliente.peso %}<span class="meta-chip">{{ cliente.peso|floatformat:1 }} kg</span>{% endif %}
+                    </div>
+                    <div class="tutor-line">
+                        <div class="av-sm">{{ cliente.nome|slice:":1"|upper }}</div>
+                        <span>Tutor <b>{{ cliente.nome }}</b></span>
+                        {% if cliente.telefone %}
+                            <span class="dot"></span>
+                            <span class="phone">{{ cliente.telefone }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="hero-r">
+                <button class="triage-btn" type="button" onclick="openTriage()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M12 21s-7-4.5-7-11a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 6.5-7 11-7 11Z" />
+                    </svg>
+                    Realizar triagem
+                </button>
+                <a href="{% url 'chat' cliente.pk %}" class="chat-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
+                    Abrir chat
+                </a>
+            </div>
+        </header>
+        <div class="sec-head">
+            <div>
+                <h2>Prontuario <em>clinico</em>.</h2>
+                <p>Historico de consultas, videos e exames anexados.</p>
+            </div>
+            <button class="btn btn-primary" type="button" onclick="openNewConsult()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14" />
+                </svg>
+                Nova consulta
+            </button>
+        </div>
+        <div class="timeline" id="timeline">
+            {% for consulta in consultas %}
+                <article class="consult">
+                    {% if consulta.video %}
+                        <video class="consult-video" controls preload="metadata" playsinline src="{{ consulta.video.url }}">
+                            Seu navegador nao suporta reproducao de video.
+                        </video>
+                    {% endif %}
+                    <div class="consult-body">
+                        <div class="consult-head">
+                            <div>
+                                <h3><a href="{% url 'consulta' consulta.pk %}">Consulta · {{ consulta.data|date:'d/m/Y' }}</a></h3>
+                            </div>
+                        </div>
+                        <p class="consult-notes">{{ consulta.observacao }}</p>
+                        {% if consulta.pdf %}
+                            <div class="exams">
+                                <span class="exams-label">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z" />
+                                        <path d="M14 2v6h6M9 13h6M9 17h6" />
+                                    </svg>
+                                    Exames anexados
+                                </span>
+                                <a href="{{ consulta.pdf.url }}" target="_blank">
+                                    <div class="exam">
+                                        <div class="ico">
+                                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z" stroke="currentColor" stroke-width="1.5" fill="none" />
+                                                <text x="7" y="17" font-size="6" font-family="monospace" font-weight="700" fill="currentColor">PDF</text>
+                                            </svg>
+                                        </div>
+                                        <div class="nm">{{ consulta.pdf.name }}</div>
+                                        <button class="dl" type="button">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </article>
+            {% empty %}
+                <p style="color:var(--ink-mute);font-size:14px">Nenhuma consulta registrada ainda.</p>
+            {% endfor %}
+        </div>
+    </main>
+
+    <div class="scrim" id="scrimConsult" onclick="if(event.target===this)closeNewConsult()">
+        <div class="modal pb-10" role="dialog" aria-labelledby="newConsultTitle">
+            <header class="modal-head">
+                <div>
+                    <div class="eyebrow">{{ cliente.nome_animal }} · {{ cliente.nome }}</div>
+                    <h2 id="newConsultTitle">Nova <em>consulta</em>.</h2>
+                    <p>Cadastre os dados clinicos, anexe o video do atendimento e os exames em PDF.</p>
+                </div>
+                <button class="close" aria-label="Fechar" type="button" onclick="closeNewConsult()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m6 6 12 12M18 6 6 18" />
+                    </svg>
+                </button>
+            </header>
+            <form class="modal-body" enctype="multipart/form-data" method="post" action="{% url 'paciente' cliente.id %}">
+                {% csrf_token %}
+                <div class="form-section">
+                    <h3>01 · Informacoes da consulta</h3>
+                    <div class="grid g-2">
+                        <div class="field" style="grid-column:span 2">
+                            <label>Evolucao clinica & observacoes</label>
+                            <textarea name="observacao" rows="4" placeholder="Anamnese, exame fisico, conduta…" required></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <h3>02 · Video do atendimento</h3>
+                    <label class="drop" id="dropVideo">
+                        <div class="ico-d">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                <rect x="3" y="6" width="14" height="12" rx="2" />
+                                <path d="m21 9-4 3 4 3V9Z" />
+                            </svg>
+                        </div>
+                        <b>Arraste o video aqui ou clique para escolher</b>
+                        <span>MP4, MOV ou WebM · ate 500 MB</span>
+                        <input type="file" name="video" accept="video/mp4,video/mov,video/webm" id="videoInput">
+                    </label>
+                    <div class="file-list" id="videoList"></div>
+                </div>
+                <div class="form-section">
+                    <h3>03 · Exames em PDF</h3>
+                    <label class="drop" id="dropPdf">
+                        <div class="ico-d">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z" />
+                                <path d="M14 2v6h6" />
+                            </svg>
+                        </div>
+                        <b>Anexe os exames em PDF</b>
+                        <input type="file" name="exames" accept="application/pdf" id="pdfInput">
+                    </label>
+                    <div class="file-list" id="pdfList"></div>
+                </div>
+                <button class="btn btn-primary" type="submit">Salvar consulta</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="scrim" id="scrimTriage" onclick="if(event.target===this)closeTriage()"
+         style="background:rgba(20,30,25,.42);justify-content:flex-end;padding:0;align-items:stretch"></div>
+    <aside class="triage-drawer" id="triageDrawer" role="dialog" aria-labelledby="triageTitle">
+        <header class="triage-head">
+            <div>
+                <div class="eyebrow" style="color:rgba(255,255,255,.7)">Triagem rapida · {{ cliente.nome_animal }}</div>
+                <h2 id="triageTitle">Avaliacao <em>de chegada</em>.</h2>
+                <p>Sinais vitais e classificacao de urgencia antes do atendimento.</p>
+            </div>
+            <button class="close" aria-label="Fechar" type="button" onclick="closeTriage()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m6 6 12 12M18 6 6 18" />
+                </svg>
+            </button>
+        </header>
+        <form method="post" action="#">
+            {% csrf_token %}
+            <div class="triage-body">
+                <div>
+                    <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-mute);display:block;margin-bottom:10px">
+                        Classificacao de urgencia
+                    </label>
+                </div>
+                <div>
+                    <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-mute);display:block;margin-bottom:10px">
+                        Sinais vitais
+                    </label>
+                    <div class="vital-grid">
+                        <div class="vital">
+                            <label>Frequencia cardiaca</label>
+                            <div class="suffix" data-unit="bpm">
+                                <input type="number" name="frequencia_cardiaca" value="98">
+                            </div>
+                        </div>
+                        <div class="vital">
+                            <label>Frequencia respiratoria</label>
+                            <div class="suffix" data-unit="mpm">
+                                <input type="number" name="frequencia_respiratoria" value="22">
+                            </div>
+                        </div>
+                        <div class="vital">
+                            <label>Temperatura</label>
+                            <div class="suffix" data-unit="°C">
+                                <input type="number" name="temperatura" step="0.1" value="38.7">
+                            </div>
+                        </div>
+                        <div class="vital">
+                            <label>Peso atual</label>
+                            <div class="suffix" data-unit="kg">
+                                <input type="number" name="peso" step="0.1">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="field-block">
+                    <label>Queixa principal do tutor</label>
+                    <textarea name="queixa" placeholder="Ex: vomito desde ontem, recusa de alimento…"></textarea>
+                </div>
+                <div class="field-block">
+                    <label>Observacoes da triagem</label>
+                    <textarea name="observacao" placeholder="Estado geral, mucosas, hidratacao…"></textarea>
+                </div>
+            </div>
+            <footer class="triage-foot">
+                <button class="btn btn-primary" type="submit">Encaminhar para consulta</button>
+            </footer>
+        </form>
+    </aside>
+
+    <div class="toast" id="toast">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 13l4 4L19 7" />
+        </svg>
+        <span id="toastText"></span>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        const scrimC = document.getElementById("scrimConsult");
+        const scrimT = document.getElementById("scrimTriage");
+        const drawer = document.getElementById("triageDrawer");
+
+        function openNewConsult() {
+            scrimC.classList.add("open");
+            document.body.style.overflow = "hidden";
+        }
+        function closeNewConsult() {
+            scrimC.classList.remove("open");
+            document.body.style.overflow = "";
+        }
+
+        function openTriage() {
+            scrimT.classList.add("open");
+            drawer.classList.add("open");
+            document.body.style.overflow = "hidden";
+        }
+        function closeTriage() {
+            scrimT.classList.remove("open");
+            drawer.classList.remove("open");
+            document.body.style.overflow = "";
+        }
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+                closeNewConsult();
+                closeTriage();
+            }
+        });
+    </script>
+{% endblock %}

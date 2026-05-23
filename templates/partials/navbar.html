@@ -1,0 +1,31 @@
+<aside class="sidebar">
+    <button class="sidebar-close"
+            type="button"
+            aria-label="Fechar menu"
+            onclick="closeSidebar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m6 6 12 12M18 6 6 18" />
+        </svg>
+    </button>
+    <a class="brand" href="#"><span class="glyph"></span> petcare<span class="wm-dot">.</span></a>
+    <div class="nav-section">
+        <a class="nav-item active" href="{% url 'clientes' %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                <circle cx="9" cy="8" r="3" />
+                <path d="M3 20a6 6 0 0 1 12 0M15 11a3 3 0 1 0 0-6M21 20a6 6 0 0 0-6-6" />
+            </svg>
+            Clientes
+        </a>
+    </div>
+    <div class="sidebar-foot">
+        <div class="avt">H</div>
+        <div class="who">
+            <b>Dra. Helena</b>
+            <span>Clinica Santa Luz</span>
+        </div>
+    </div>
+</aside>
+<button class="sidebar-backdrop"
+        type="button"
+        aria-label="Fechar menu"
+        onclick="closeSidebar()"></button>
