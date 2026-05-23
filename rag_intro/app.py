@@ -1,33 +1,18 @@
 import os
-import warnings
 
+from decouple import config
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_community.vectorstores import FAISS
-from langchain.chains import RetrievalQA
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 
-os.environ["OPENAI_API_KEY"] = "SUA_API_KEY"
+os.environ["OPENAI_API_KEY"] = config("OPENAI_API_KEY")
 
 caminho_pdf = "Perceptron.pdf"
 
 loader = PyPDFLoader(caminho_pdf)
 documentos = loader.load()
-
-def train():
-    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
-    chunks = splitter.split_documents(documentos)
-
-    embeddings = OpenAIEmbeddings()
-    db_path = "banco_faiss"
-    if os.path.exists(db_path):
-        vectordb = FAISS.load_local(db_path, embeddings, allow_dangerous_deserialization=True)
-        vectordb.add_documents(chunks)
-    else:
-        vectordb = FAISS.from_documents(chunks, embeddings)
-
-    vectordb.save_local(db_path)
 
 def train():
     splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
@@ -68,3 +53,16 @@ def retrieval(pergunta):
     chain = prompt | llm
     resposta = chain.invoke({"contexto": contexto, "pergunta": pergunta})
     return resposta.content
+
+
+if __name__ == "__main__":
+    print("Treinando o modelo com o PDF...")
+    train()
+    print("Treinamento concluído.\n")
+
+    while True:
+        pergunta = input("Pergunta (ou 'sair'): ").strip()
+        if pergunta.lower() == "sair":
+            break
+        resposta = retrieval(pergunta)
+        print(f"\nResposta: {resposta}\n")

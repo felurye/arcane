@@ -1,0 +1,6 @@
+.env
+banco_faiss/
+__pycache__/
+*.pyc
+embeddings_visualizacao_ligacoes.png
+faiss_exportado.json
