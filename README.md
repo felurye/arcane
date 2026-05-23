@@ -1,5 +1,51 @@
 # Arcane - Workshop de programação web + IA
 
+## Como executar o projeto
+
+### 1. Criar e ativar o ambiente virtual
+
+```bash
+# Linux / macOS
+python3 -m venv venv
+source venv/bin/activate
+
+# Windows
+python -m venv venv
+venv\Scripts\Activate
+```
+
+> Se o Windows retornar erro de permissão, execute antes:
+>
+> ```powershell
+> Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+> ```
+
+### 2. Instalar as dependências
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Aplicar as migrações
+
+```bash
+python manage.py migrate
+```
+
+### 4. Criar um superusuário (opcional)
+
+```bash
+python manage.py createsuperuser
+```
+
+### 5. Iniciar o servidor
+
+```bash
+python manage.py runserver
+```
+
+Acesse em `http://127.0.0.1:8000/users/cadastro/`.
+
 ## Sobre o workshop
 
 O **Arcane** é um workshop prático de dois dias focado em desenvolvimento web com Python/Django e integração de IA usando LangChain. Ao longo do workshop, você vai construir um sistema real com agentes inteligentes, RAG (Retrieval-Augmented Generation) e chat em tempo real, usando o projeto **PetCare** como base.
@@ -26,6 +72,7 @@ O **Arcane** é um workshop prático de dois dias focado em desenvolvimento web 
 - **Front-end - Chat em tempo real com IA** - interface de chat com JavaScript
 - **Ver fontes** - como o agente cita as fontes do RAG
 - **Secretária autônoma + Google Calendar** - agente com ferramentas externas e integração de calendário
+- **Assistente de IA**
 
 ## Agentes de IA vs Modelos LLM
 
@@ -190,6 +237,49 @@ messages = [
     }
 ]
 ```
+
+**Exemplo de system prompt em produção**
+
+Um system prompt real vai muito além de uma linha de instrução. Ele define o comportamento completo do agente: tom, regras, limitações, formatação de resposta e como usar as ferramentas de RAG. O exemplo abaixo é o system prompt de "Melissa", assistente virtual da Pythonando:
+
+```
+Você é Melissa, agente virtual oficial da Pythonando, uma escola online especializada em
+cursos de programação com Python e Django.
+
+Sua missão é atender e orientar usuários via WhatsApp, com um foco especial em ajudar,
+encantar e vender.
+
+OBRIGATÓRIO!
+Sempre busque as informações na TOOL ConhecimentoPythonando, NUNCA responda sem buscar os
+dados por lá, independente de achar que já saiba a resposta.
+
+📌 INSTRUÇÕES GERAIS:
+- Sempre que possível, cumprimente o usuário pelo nome.
+- Use uma linguagem informal-profissional: natural, próxima, mas sem exagero em gírias.
+- Jamais cole trechos brutos dos treinamentos. Sempre reescreva de forma fluida.
+- Nunca crie informações próprias ou presuma algo que não foi treinado.
+
+💬 FORMATAÇÃO DE MENSAGENS PARA WHATSAPP:
+- Use texto simples e formatação nativa do WhatsApp.
+- Para ênfase, utilize asteriscos (exemplo: *ênfase*).
+- Sempre deixe espaço entre parágrafos para facilitar a leitura.
+- Use apenas 1 emoji por mensagem, no início ou final, e de forma estratégica.
+
+✅ ORIENTAÇÕES DE VENDAS:
+- Destaque sempre benefícios claros, resultados alcançáveis e suporte oferecido.
+- Se o usuário demonstrar interesse, conduza suavemente para a ação.
+- Seja consultivo: mostre o valor do que a Pythonando oferece, sem pressão.
+
+🚫 INSTRUÇÕES FINAIS:
+- Nunca invente respostas.
+- Mantenha o tom leve, positivo, humano e confiável.
+```
+
+Pontos importantes desse prompt:
+
+- **Obrigatoriedade da tool** - o agente é instruído a sempre consultar a base de conhecimento via RAG antes de responder, nunca "adivinhar" com base no que o LLM já sabe
+- **Tom e formatação** - o system prompt define até como formatar as mensagens para o canal específico (WhatsApp)
+- **Regras de negócio** - o comportamento de vendas é definido aqui, não no código
 
 ### Resumo
 
