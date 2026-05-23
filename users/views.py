@@ -10,7 +10,7 @@ from .models import Cliente, Consulta
 
 def cadastro(request):
     if request.method == 'GET':
-        return render(request, 'cadastro.html')
+        return render(request, 'register.html')
     elif request.method == 'POST':
         username = request.POST.get('username')
         senha = request.POST.get('senha')
@@ -18,17 +18,17 @@ def cadastro(request):
 
         if not senha == confirmar_senha:
             messages.add_message(request, constants.ERROR, 'Senha e confirmar senha não são iguais.')
-            return redirect('cadastro')
+            return redirect('register')
 
         if len(senha) < 6:
             messages.add_message(request, constants.ERROR, 'Sua senha deve ter pelo menos 6 caracteres.')
-            return redirect('cadastro')
+            return redirect('register')
 
         users = User.objects.filter(username=username)
 
         if users.exists():
             messages.add_message(request, constants.ERROR, 'Já existe um usuário com esse username.')
-            return redirect('cadastro')
+            return redirect('register')
 
         User.objects.create_user(username=username, password=senha)
         return redirect('login')
@@ -44,7 +44,7 @@ def login(request):
         user = authenticate(username=username, password=senha)
         if user is not None:
             auth.login(request, user)
-            return redirect('clientes')
+            return redirect('clients')
         else:
             messages.add_message(request, constants.ERROR, 'Usuário ou senha inválidos.')
             return redirect('login')
@@ -56,7 +56,7 @@ def clientes(request):
         clientes_qs = Cliente.objects.all()
         if tipo:
             clientes_qs = clientes_qs.filter(especie=tipo.upper())
-        return render(request, 'clientes.html', {'clientes': clientes_qs})
+        return render(request, 'clients.html', {'clientes': clientes_qs})
     elif request.method == 'POST':
         nome = request.POST.get('nome')
         cpf = request.POST.get('cpf')
@@ -79,17 +79,17 @@ def clientes(request):
         )
         cliente.save()
         messages.add_message(request, constants.SUCCESS, 'Cliente cadastrado com sucesso.')
-        return redirect('clientes')
+        return redirect('clients')
     else:
         messages.add_message(request, constants.ERROR, 'Erro ao cadastrar cliente.')
-        return redirect('clientes')
+        return redirect('clients')
 
 
 def paciente(request, pk):
     if request.method == 'GET':
         cliente = get_object_or_404(Cliente, pk=pk)
         consultas = Consulta.objects.filter(cliente=cliente)
-        return render(request, 'paciente.html', {'cliente': cliente, 'consultas': consultas})
+        return render(request, 'patient.html', {'cliente': cliente, 'consultas': consultas})
     elif request.method == 'POST':
         observacao = request.POST.get('observacao')
         video = request.FILES.get('video')
@@ -98,14 +98,14 @@ def paciente(request, pk):
         cliente = get_object_or_404(Cliente, pk=pk)
         consulta_obj = Consulta(cliente=cliente, observacao=observacao, video=video, pdf=exames)
         consulta_obj.save()
-        return redirect('paciente', pk)
+        return redirect('patient', pk)
 
 
 def consulta(request, pk):
     consulta_obj = get_object_or_404(Consulta.objects.select_related('cliente'), pk=pk)
     return render(
         request,
-        'consulta.html',
+        'appointment.html',
         {
             'consulta': consulta_obj,
             'cliente': consulta_obj.cliente,

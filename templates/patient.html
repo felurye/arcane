@@ -19,8 +19,8 @@
                 </svg>
             </button>
             <div class="crumbs">
-                <a href="{% url 'clientes' %}">Clinica</a> <span class="sep">/</span>
-                <a href="{% url 'clientes' %}">Clientes</a> <span class="sep">/</span>
+                <a href="{% url 'clients' %}">Clinica</a> <span class="sep">/</span>
+                <a href="{% url 'clients' %}">Clientes</a> <span class="sep">/</span>
                 <span class="here">{{ cliente.nome_animal|default:"Paciente" }}</span>
             </div>
         </div>
@@ -92,7 +92,7 @@
                     <div class="consult-body">
                         <div class="consult-head">
                             <div>
-                                <h3><a href="{% url 'consulta' consulta.pk %}">Consulta · {{ consulta.data|date:'d/m/Y' }}</a></h3>
+                                <h3><a href="{% url 'appointment' consulta.pk %}">Consulta · {{ consulta.data|date:'d/m/Y' }}</a></h3>
                             </div>
                         </div>
                         <p class="consult-notes">{{ consulta.observacao }}</p>
@@ -145,7 +145,7 @@
                     </svg>
                 </button>
             </header>
-            <form class="modal-body" enctype="multipart/form-data" method="post" action="{% url 'paciente' cliente.id %}">
+            <form class="modal-body" enctype="multipart/form-data" method="post" action="{% url 'patient' cliente.id %}">
                 {% csrf_token %}
                 <div class="form-section">
                     <h3>01 · Informacoes da consulta</h3>

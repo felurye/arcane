@@ -17,9 +17,9 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
         </button>
         <div class="crumbs">
-            <a href="{% url 'clientes' %}">Clinica</a> <span class="sep">/</span>
-            <a href="{% url 'clientes' %}">Clientes</a> <span class="sep">/</span>
-            <a href="{% url 'paciente' cliente.pk %}">{{ cliente.nome_animal|default:"Paciente" }}</a> <span class="sep">/</span>
+            <a href="{% url 'clients' %}">Clinica</a> <span class="sep">/</span>
+            <a href="{% url 'clients' %}">Clientes</a> <span class="sep">/</span>
+            <a href="{% url 'patient' cliente.pk %}">{{ cliente.nome_animal|default:"Paciente" }}</a> <span class="sep">/</span>
             <span class="here">Consulta · {{ consulta.data|date:"d M Y" }}</span>
         </div>
     </div>

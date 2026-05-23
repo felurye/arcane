@@ -49,9 +49,9 @@
                 <input id="searchInput" type="text" placeholder="Buscar por nome do tutor ou do pet...">
             </div>
             <div class="filter-pills">
-                <a href="{% url 'clientes' %}" class="pill active" data-filter="all">Todos</a>
-                <a href="{% url 'clientes' %}?tipo=C" class="pill" data-filter="dog">Cachorros</a>
-                <a href="{% url 'clientes' %}?tipo=G" class="pill" data-filter="cat">Gatos</a>
+                <a href="{% url 'clients' %}" class="pill active" data-filter="all">Todos</a>
+                <a href="{% url 'clients' %}?tipo=C" class="pill" data-filter="dog">Cachorros</a>
+                <a href="{% url 'clients' %}?tipo=G" class="pill" data-filter="cat">Gatos</a>
             </div>
         </div>
         <div class="table-wrap">
@@ -67,13 +67,13 @@
                 </thead>
                 <tbody id="tbody">
                     {% for cliente in clientes %}
-                        <tr onclick="window.location='{% url 'paciente' cliente.pk %}'" style="cursor:pointer">
+                        <tr onclick="window.location='{% url 'patient' cliente.pk %}'" style="cursor:pointer">
                             <td class="tutor">
                                 <div class="cell-inline">
                                     <div class="a">{{ cliente.nome|slice:":1"|upper }}</div>
                                     <div class="text-inline">
                                         <div class="n">
-                                            <a href="{% url 'paciente' cliente.pk %}">{{ cliente.nome }}</a>
+                                            <a href="{% url 'patient' cliente.pk %}">{{ cliente.nome }}</a>
                                         </div>
                                         <div class="m">{{ cliente.cpf }}</div>
                                     </div>
@@ -89,7 +89,7 @@
                                         </svg>
                                     </div>
                                     <div>
-                                        <a href="{% url 'paciente' cliente.pk %}" class="pn">{{ cliente.nome_animal }}</a>
+                                        <a href="{% url 'patient' cliente.pk %}" class="pn">{{ cliente.nome_animal }}</a>
                                         <div class="pm">{{ cliente.get_especie_display }}</div>
                                     </div>
                                 </div>
@@ -140,7 +140,7 @@
                     </svg>
                 </button>
             </header>
-            <form class="modal-body" method="post" action="{% url 'clientes' %}">
+            <form class="modal-body" method="post" action="{% url 'clients' %}">
                 {% csrf_token %}
                 <div class="form-section">
                     <h3>01 · Dados do tutor</h3>

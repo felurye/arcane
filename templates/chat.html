@@ -24,7 +24,7 @@
             </div>
         </div>
         <div class="head-acts">
-            <a href="{% url 'paciente' cliente.pk %}" class="chat-back">
+            <a href="{% url 'patient' cliente.pk %}" class="chat-back">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m15 18-6-6 6-6"/></svg>
                 Voltar ao prontuario
             </a>
@@ -33,7 +33,7 @@
 
     <div class="context">
         <span class="ctx-tag">Contexto desta conversa</span>
-        <a href="{% url 'paciente' cliente.pk %}" class="pet-mini">
+        <a href="{% url 'patient' cliente.pk %}" class="pet-mini">
             <span class="a">{{ cliente.nome_animal|slice:":1"|upper }}</span>
             <b>{{ cliente.nome_animal }}</b>
             <span>
