@@ -44,7 +44,7 @@ python app.py
 
 O script vai:
 
-1. Carregar e indexar o PDF (salva o banco vetorial em `banco_faiss/`)
+1. Carregar e indexar o PDF (salva o banco vetorial em `faiss_store/`)
 2. Abrir um loop interativo para perguntas
 
 ```
@@ -66,7 +66,7 @@ Pergunta (ou 'sair'): sair
 Gera um gráfico 2D dos vetores semânticos usando t-SNE e marca as 3 frases mais próximas de uma query de exemplo.
 
 ```bash
-python visualizar_embeddings.py
+python visualize_embeddings.py
 ```
 
 Saída: `embeddings_visualizacao_ligacoes.png` na pasta `rag-intro/`.
@@ -75,23 +75,23 @@ Saída: `embeddings_visualizacao_ligacoes.png` na pasta `rag-intro/`.
 
 Exporta todos os documentos indexados no banco vetorial junto com os primeiros 10 valores de cada vetor.
 
-> Requer que o banco `banco_faiss/` já exista (rode `app.py` primeiro).
+> Requer que o banco `faiss_store/` já exista (rode `app.py` primeiro).
 
 ```bash
-python visualizar_faiss.py
+python visualize_faiss.py
 ```
 
-Saída: `faiss_exportado.json` na pasta `rag-intro/`.
+Saída: `faiss_exported.json` na pasta `rag-intro/`.
 
 ## Estrutura
 
 ```
 rag-intro/
 ├── app.py                         # script principal (RAG interativo)
-├── visualizar_embeddings.py       # gráfico t-SNE dos embeddings
-├── visualizar_faiss.py            # exporta o banco vetorial para JSON
+├── visualize_embeddings.py        # gráfico t-SNE dos embeddings
+├── visualize_faiss.py             # exporta o banco vetorial para JSON
 ├── Perceptron.pdf                 # PDF de exemplo
-├── banco_faiss/                   # banco vetorial gerado (ignorado pelo git)
+├── faiss_store/                   # banco vetorial gerado (ignorado pelo git)
 ├── requirements.txt
 ├── .env.example
 └── .gitignore

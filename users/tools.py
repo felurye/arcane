@@ -2,31 +2,31 @@ import httpx
 from agno.tools import tool
 
 
-@tool("buscar_eventos_adversos_veterinarios")
-def buscar_eventos_adversos_veterinarios(
-    medicamento: str,
-    tipo_busca: str = "principio_ativo",
-    especie: str = "",
-    limite: int = 5,
+@tool("search_adverse_veterinary_events")
+def search_adverse_veterinary_events(
+    medication: str,
+    search_type: str = "active_ingredient",
+    species: str = "",
+    limit: int = 5,
 ) -> str:
-    """Busca eventos adversos veterinários reportados ao FDA para um medicamento.
+    """Search for adverse veterinary events reported to the FDA for a medication.
 
     Args:
-        medicamento: Nome comercial ou princípio ativo. Ex: "Meloxicam", "Rimadyl", "Amoxicillin".
-        tipo_busca: "principio_ativo" ou "nome_comercial". Padrão: "principio_ativo".
-        especie: Filtrar por espécie. Ex: "Dog", "Cat", "Horse". Vazio para todas.
-        limite: Quantidade de casos (1-10). Padrão: 5.
+        medication: Brand name or active ingredient. Ex: "Meloxicam", "Rimadyl", "Amoxicillin".
+        search_type: "active_ingredient" or "brand_name". Default: "active_ingredient".
+        species: Filter by species. Ex: "Dog", "Cat", "Horse". Empty for all.
+        limit: Number of cases (1-10). Default: 5.
 
     Returns:
-        JSON com estatísticas agregadas (reações, desfechos, espécies) e casos individuais do FDA.
+        JSON with aggregated statistics (reactions, outcomes, species) and individual FDA cases.
     """
     BASE_URL = "https://api.fda.gov/animalandveterinary/event.json"
-    limite = max(1, min(limite, 10))
-    campo = "drug.brand_name" if tipo_busca == "nome_comercial" else "drug.active_ingredients.name"
+    limit = max(1, min(limit, 10))
+    field = "drug.brand_name" if search_type == "brand_name" else "drug.active_ingredients.name"
 
-    query = f'{campo}:"{medicamento}"'
-    if especie:
-        query += f'+AND+animal.species:"{especie}"'
+    query = f'{field}:"{medication}"'
+    if species:
+        query += f'+AND+animal.species:"{species}"'
 
-    resp = httpx.get(BASE_URL, params={"search": query, "limit": str(limite)}, timeout=15)
+    resp = httpx.get(BASE_URL, params={"search": query, "limit": str(limit)}, timeout=15)
     return resp.text

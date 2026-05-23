@@ -9,12 +9,12 @@ from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, StreamingHttpResponse
 
-from .models import Cliente, Consulta, Pergunta, ContextRag
-from .agent import TriagemAgent, AssistantAgent, SecretariaAI
+from .models import Client, Appointment, Question, RagContext
+from .agent import TriageAgent, AssistantAgent, SecretaryAI
 from agno.agent import RunOutput, RunOutputEvent, RunEvent
 
 
-def cadastro(request):
+def register(request):
     if request.method == 'GET':
         return render(request, 'register.html')
     elif request.method == 'POST':
@@ -56,34 +56,34 @@ def login(request):
             return redirect('login')
 
 
-def clientes(request):
+def clients(request):
     if request.method == 'GET':
-        tipo = request.GET.get('tipo')
-        clientes_qs = Cliente.objects.all()
-        if tipo:
-            clientes_qs = clientes_qs.filter(especie=tipo.upper())
-        return render(request, 'clients.html', {'clientes': clientes_qs})
+        species_filter = request.GET.get('tipo')
+        clients_qs = Client.objects.all()
+        if species_filter:
+            clients_qs = clients_qs.filter(species=species_filter.upper())
+        return render(request, 'clients.html', {'clients': clients_qs})
     elif request.method == 'POST':
-        nome = request.POST.get('nome')
+        name = request.POST.get('name')
         cpf = request.POST.get('cpf')
-        telefone = request.POST.get('telefone')
-        especie = request.POST.get('especie')
-        nome_animal = request.POST.get('nome_animal')
-        raca = request.POST.get('raca')
-        idade = request.POST.get('idade')
-        peso = request.POST.get('peso')
+        phone = request.POST.get('phone')
+        species = request.POST.get('species')
+        animal_name = request.POST.get('animal_name')
+        breed = request.POST.get('breed')
+        age = request.POST.get('age')
+        weight = request.POST.get('weight')
 
-        cliente = Cliente(
-            nome=nome,
+        client = Client(
+            name=name,
             cpf=cpf,
-            telefone=telefone,
-            especie=especie,
-            nome_animal=nome_animal,
-            raca=raca,
-            idade=idade,
-            peso=peso,
+            phone=phone,
+            species=species,
+            animal_name=animal_name,
+            breed=breed,
+            age=age,
+            weight=weight,
         )
-        cliente.save()
+        client.save()
         messages.add_message(request, constants.SUCCESS, 'Cliente cadastrado com sucesso.')
         return redirect('clients')
     else:
@@ -91,105 +91,105 @@ def clientes(request):
         return redirect('clients')
 
 
-def paciente(request, pk):
+def patient(request, pk):
     if request.method == 'GET':
-        cliente = get_object_or_404(Cliente, pk=pk)
-        consultas = Consulta.objects.filter(cliente=cliente)
-        return render(request, 'patient.html', {'cliente': cliente, 'consultas': consultas})
+        client = get_object_or_404(Client, pk=pk)
+        appointments = Appointment.objects.filter(client=client)
+        return render(request, 'patient.html', {'client': client, 'appointments': appointments})
     elif request.method == 'POST':
-        observacao = request.POST.get('observacao')
+        observation = request.POST.get('observation')
         video = request.FILES.get('video')
-        exames = request.FILES.get('exames')
+        exams = request.FILES.get('exames')
 
-        cliente = get_object_or_404(Cliente, pk=pk)
-        consulta_obj = Consulta(cliente=cliente, observacao=observacao, video=video, pdf=exames)
-        consulta_obj.save()
+        client = get_object_or_404(Client, pk=pk)
+        appointment = Appointment(client=client, observation=observation, video=video, pdf=exams)
+        appointment.save()
         return redirect('patient', pk)
 
 
-def consulta(request, pk):
-    consulta_obj = get_object_or_404(Consulta.objects.select_related('cliente'), pk=pk)
+def appointment(request, pk):
+    appointment_obj = get_object_or_404(Appointment.objects.select_related('client'), pk=pk)
     return render(
         request,
         'appointment.html',
         {
-            'consulta': consulta_obj,
-            'cliente': consulta_obj.cliente,
+            'appointment': appointment_obj,
+            'client': appointment_obj.client,
         },
     )
 
 
 @csrf_exempt
 def chat(request, pk):
-    cliente = get_object_or_404(Cliente, pk=pk)
+    client = get_object_or_404(Client, pk=pk)
     if request.method == 'GET':
-        consultas = Consulta.objects.filter(cliente=cliente).order_by('-data')
-        ultima_consulta = consultas.first()
-        total_exames = consultas.filter(pdf__isnull=False).exclude(pdf='').count()
+        appointments = Appointment.objects.filter(client=client).order_by('-date')
+        latest_appointment = appointments.first()
+        total_exams = appointments.filter(pdf__isnull=False).exclude(pdf='').count()
         return render(
             request,
             'chat.html',
             {
-                'cliente': cliente,
-                'ultima_consulta': ultima_consulta,
-                'total_consultas': consultas.count(),
-                'total_exames': total_exames,
+                'client': client,
+                'latest_appointment': latest_appointment,
+                'total_appointments': appointments.count(),
+                'total_exams': total_exams,
             },
         )
     elif request.method == 'POST':
-        pergunta = request.POST.get('pergunta')
-        pergunta_model = Pergunta(pergunta=pergunta, cliente=cliente)
-        pergunta_model.save()
-        return JsonResponse({'id': pergunta_model.id})
+        question_text = request.POST.get('question')
+        question = Question(text=question_text, client=client)
+        question.save()
+        return JsonResponse({'id': question.id})
 
 
 @csrf_exempt
-def triage(request, id_cliente):
-    frequencia_cardiaca = request.POST.get('frequencia_cardiaca')
-    frequencia_respiratoria = request.POST.get('frequencia_respiratoria')
-    temperatura = request.POST.get('temperatura')
-    peso = request.POST.get('peso')
-    queixa = request.POST.get('queixa')
-    observacao = request.POST.get('observacao')
+def triage(request, client_id):
+    heart_rate = request.POST.get('heart_rate')
+    respiratory_rate = request.POST.get('respiratory_rate')
+    temperature = request.POST.get('temperature')
+    weight = request.POST.get('weight')
+    complaint = request.POST.get('complaint')
+    observation = request.POST.get('observation')
 
-    cliente = get_object_or_404(Cliente, id=id_cliente)
-    agent = TriagemAgent.build_agent()
-    prompt = TriagemAgent.mount_prompt(frequencia_cardiaca, frequencia_respiratoria, temperatura, peso, queixa, observacao)
+    client = get_object_or_404(Client, id=client_id)
+    agent = TriageAgent.build_agent()
+    prompt = TriageAgent.mount_prompt(heart_rate, respiratory_rate, temperature, weight, complaint, observation)
 
     response: RunOutput = agent.run(prompt)
-    result = response.content.cor
-    cliente.triagem = result
-    cliente.save()
-    return redirect('patient', id_cliente)
+    result = response.content.color
+    client.triage = result
+    client.save()
+    return redirect('patient', client_id)
 
 
 @csrf_exempt
 def stream_response(request):
-    id_pergunta = request.POST.get('id_pergunta')
-    pergunta = get_object_or_404(Pergunta, id=id_pergunta)
+    question_id = request.POST.get('question_id')
+    question = get_object_or_404(Question, id=question_id)
 
-    def gerar_resposta():
+    def generate_response():
         agent = AssistantAgent.build_agent(
-            knowledge_filters={'paciente_id': pergunta.cliente.id},
-            session_id=pergunta.cliente.id,
+            knowledge_filters={'paciente_id': question.client.id},
+            session_id=question.client.id,
         )
 
-        stream: Iterator[RunOutputEvent] = agent.run(pergunta.pergunta, stream=True, stream_events=True)
+        stream: Iterator[RunOutputEvent] = agent.run(question.text, stream=True, stream_events=True)
         for chunk in stream:
             if chunk.event == RunEvent.run_content:
                 if chunk.content:
                     yield str(chunk.content)
             if chunk.event == RunEvent.tool_call_completed:
-                context = ContextRag(
+                context = RagContext(
                     content=chunk.tool.result,
                     tool_name=chunk.tool.tool_name,
                     tool_args=chunk.tool.tool_args,
-                    pergunta=pergunta,
+                    question=question,
                 )
                 context.save()
 
     response = StreamingHttpResponse(
-        gerar_resposta(),
+        generate_response(),
         content_type='text/plain; charset=utf-8',
     )
     response['Cache-Control'] = 'no-cache'
@@ -198,16 +198,16 @@ def stream_response(request):
 
 
 def sources(request, pk):
-    pergunta = get_object_or_404(Pergunta.objects.select_related('cliente'), pk=pk)
-    contextos = ContextRag.objects.filter(pergunta=pergunta).order_by('id')
+    question = get_object_or_404(Question.objects.select_related('client'), pk=pk)
+    contexts = RagContext.objects.filter(question=question).order_by('id')
     return render(
         request,
-        'fontes.html',
+        'sources.html',
         {
-            'pergunta': pergunta,
-            'cliente': pergunta.cliente,
-            'contextos': contextos,
-            'total_fontes': contextos.count(),
+            'question': question,
+            'client': question.client,
+            'contexts': contexts,
+            'total_sources': contexts.count(),
         },
     )
 
@@ -218,7 +218,7 @@ def webhook_whatsapp(request):
     phone = data.get('data').get('key').get('remoteJid').split('@')[0]
     message = data.get('data').get('message').get('extendedTextMessage').get('text')
 
-    agent = SecretariaAI.build_agent(session_id=phone)
+    agent = SecretaryAI.build_agent(session_id=phone)
     response: RunOutput = agent.run(message)
     print(response.content)
     return JsonResponse({'response': response.content})

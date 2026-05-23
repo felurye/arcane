@@ -1,5 +1,5 @@
 ---
-name: triagem-veterinaria
+name: veterinary-triage
 description: Skill de triagem clínica para hospital veterinário. Classifica a urgência do paciente em VERDE, AMARELO, LARANJA ou VERMELHO com base nos parâmetros vitais (frequência cardíaca, frequência respiratória, temperatura), peso, espécie, queixa principal do tutor e observações da triagem. Use SEMPRE que o usuário mencionar triagem veterinária, classificação de risco veterinário, urgência veterinária, prioridade de atendimento veterinário, protocolo de Manchester veterinário, avaliar sinais vitais de cão/gato, ou fornecer dados como FC, FR, temperatura de um paciente animal para classificação. Aciona também quando o usuário perguntar 'qual a prioridade desse paciente', 'classifica esse atendimento', 'esse caso é urgente', 'cor da triagem', 'nível de urgência do animal', ou enviar dados vitais de um animal para avaliação.
 ---
 
@@ -166,16 +166,16 @@ Classifique como VERDE quando:
 
 ## Formato da Resposta
 
-Após coletar todos os dados obrigatórios e aplicar a lógica de classificação, Claude deve responder **APENAS** com a cor correspondente, em texto puro e minúsculo, sem nenhuma informação adicional. Exemplos de resposta válida:
+Após coletar todos os dados obrigatórios e aplicar a lógica de classificação, Claude deve responder **APENAS** com a palavra em inglês correspondente à cor, em texto puro e minúsculo, sem nenhuma informação adicional. Exemplos de resposta válida:
 
-- `verde`
-- `amarelo`
-- `laranja`
-- `vermelho`
+- `green`
+- `yellow`
+- `orange`
+- `red`
 
 **Regras de formato:**
 
-- A resposta é UMA ÚNICA PALAVRA: a cor.
+- A resposta é UMA ÚNICA PALAVRA em inglês: a cor (green, yellow, orange ou red).
 - Sem emoji, sem explicação, sem análise, sem disclaimer, sem formatação.
 - Sem quebra de linha antes ou depois.
 - Se o usuário pedir mais detalhes após a classificação, aí sim Claude pode explicar os critérios que levaram àquela cor.

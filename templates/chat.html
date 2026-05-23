@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_head %}
-    <link rel="stylesheet" href="{% static 'users/css/clientes.css' %}">
+    <link rel="stylesheet" href="{% static 'users/css/clients.css' %}">
     <link rel="stylesheet" href="{% static 'users/css/chat.css' %}">
 {% endblock %}
 
@@ -24,7 +24,7 @@
             </div>
         </div>
         <div class="head-acts">
-            <a href="{% url 'patient' cliente.pk %}" class="chat-back">
+            <a href="{% url 'patient' client.pk %}" class="chat-back">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m15 18-6-6 6-6"/></svg>
                 Voltar ao prontuario
             </a>
@@ -33,17 +33,17 @@
 
     <div class="context">
         <span class="ctx-tag">Contexto desta conversa</span>
-        <a href="{% url 'patient' cliente.pk %}" class="pet-mini">
-            <span class="a">{{ cliente.nome_animal|slice:":1"|upper }}</span>
-            <b>{{ cliente.nome_animal }}</b>
+        <a href="{% url 'patient' client.pk %}" class="pet-mini">
+            <span class="a">{{ client.animal_name|slice:":1"|upper }}</span>
+            <b>{{ client.animal_name }}</b>
             <span>
-                {{ cliente.get_especie_display }}{% if cliente.raca %} · {{ cliente.raca }}{% endif %}{% if cliente.idade %} · {{ cliente.idade }}a{% endif %}{% if cliente.peso %} · {{ cliente.peso|floatformat:1 }} kg{% endif %}
+                {{ client.get_species_display }}{% if client.breed %} · {{ client.breed }}{% endif %}{% if client.age %} · {{ client.age }}a{% endif %}{% if client.weight %} · {{ client.weight|floatformat:1 }} kg{% endif %}
             </span>
         </a>
-        {% if ultima_consulta %}
-            <span class="ctx-chip">Ultima consulta · {{ ultima_consulta.data|date:"d M" }}</span>
+        {% if latest_appointment %}
+            <span class="ctx-chip">Ultima consulta · {{ latest_appointment.date|date:"d M" }}</span>
         {% endif %}
-        <span class="ctx-chip">{{ total_consultas }} consulta{{ total_consultas|pluralize }}{% if total_exames %} · {{ total_exames }} exame{{ total_exames|pluralize }}{% endif %}</span>
+        <span class="ctx-chip">{{ total_appointments }} consulta{{ total_appointments|pluralize }}{% if total_exams %} · {{ total_exams }} exame{{ total_exams|pluralize }}{% endif %}</span>
     </div>
 
     <div class="messages" id="messages">
@@ -55,7 +55,7 @@
                 <div class="msg-body">
                     <div class="msg-meta"><b>Petcare IA</b><span class="ts">{% now "H:i" %}</span></div>
                     <div class="bubble">
-                        <p>Ola! Eu sou sua <em>assistente clinica</em>. Posso resumir consultas, cruzar exames com o historico de {{ cliente.nome_animal|default:"este paciente" }} ou sugerir condutas com base no prontuario.</p>
+                        <p>Ola! Eu sou sua <em>assistente clinica</em>. Posso resumir consultas, cruzar exames com o historico de {{ client.animal_name|default:"este paciente" }} ou sugerir condutas com base no prontuario.</p>
                         <p style="color:var(--ink-soft);font-size:13.5px">Como posso ajudar agora?</p>
                     </div>
                 </div>
@@ -64,11 +64,11 @@
     </div>
 
     <div class="composer-wrap">
-        <form class="composer" id="form-pergunta">
-            <textarea id="pergunta" rows="1"
-                      placeholder="Pergunte sobre {{ cliente.nome_animal|default:'o paciente' }}, peca um resumo ou gere um laudo…"
+        <form class="composer" id="form-question">
+            <textarea id="question" rows="1"
+                      placeholder="Pergunte sobre {{ client.animal_name|default:'o paciente' }}, peca um resumo ou gere um laudo…"
                       oninput="autosize(this); toggleSend()"
-                      onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();document.getElementById('form-pergunta').requestSubmit();}"></textarea>
+                      onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();document.getElementById('form-question').requestSubmit();}"></textarea>
             <div class="composer-row">
                 <div></div>
                 <button class="send" id="sendBtn" type="submit" disabled aria-label="Enviar">
@@ -85,9 +85,9 @@
 <script>
   const userInitial = "{% if user.is_authenticated %}{{ user.username|slice:':1'|upper }}{% else %}V{% endif %}";
   const streamUrl = "{% url 'stream_response' %}";
-  const fontesUrlBase = "{% url 'sources' 0 %}";
-  function fontesUrl(perguntaId) {
-    return fontesUrlBase.replace("/0/", "/" + perguntaId + "/");
+  const sourcesUrlBase = "{% url 'sources' 0 %}";
+  function sourcesUrl(questionId) {
+    return sourcesUrlBase.replace("/0/", "/" + questionId + "/");
   }
 
   marked.setOptions({ breaks: true, gfm: true });
@@ -107,7 +107,7 @@
   }
 
   function toggleSend() {
-    const ta = document.getElementById("pergunta");
+    const ta = document.getElementById("question");
     const btn = document.getElementById("sendBtn");
     btn.disabled = !ta.value.trim();
   }
@@ -117,11 +117,11 @@
     messages.scrollTop = messages.scrollHeight;
   }
 
-  document.getElementById("form-pergunta").addEventListener("submit", async function (event) {
+  document.getElementById("form-question").addEventListener("submit", async function (event) {
     event.preventDefault();
-    const input = document.getElementById("pergunta");
-    const pergunta = input.value.trim();
-    if (!pergunta) return;
+    const input = document.getElementById("question");
+    const question = input.value.trim();
+    if (!question) return;
 
     const messages = document.getElementById("messages");
 
@@ -139,16 +139,16 @@
         </div>
         <div class="msg-avt user">${userInitial}</div>
       </div>`;
-    userWrap.querySelector(".bubble p").textContent = pergunta;
+    userWrap.querySelector(".bubble p").textContent = question;
     messages.appendChild(userWrap);
 
     input.value = "";
 
     const formData = new FormData();
-    formData.append("pergunta", pergunta);
+    formData.append("question", question);
     const response = await fetch(window.location.href, { method: "POST", body: formData });
     const data = await response.json();
-    const perguntaId = data.id;
+    const questionId = data.id;
 
     const typingWrap = document.createElement("div");
     typingWrap.className = "msg-wrap typing";
@@ -178,9 +178,9 @@
             <b>Petcare IA</b>
             <span class="ts">${now()}</span>
           </div>
-          <div class="bubble markdown"><div class="md-body" id="resposta-${perguntaId}"></div></div>
+          <div class="bubble markdown"><div class="md-body" id="response-${questionId}"></div></div>
           <div class="msg-foot">
-            <a class="link" href="${fontesUrl(perguntaId)}">
+            <a class="link" href="${sourcesUrl(questionId)}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 1 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7L12 19"/></svg>
               Confira as fontes
             </a>
@@ -190,13 +190,13 @@
       </div>`;
     messages.appendChild(botWrap);
 
-    const respostaElemento = document.getElementById(`resposta-${perguntaId}`);
-    let respostaMd = "";
+    const responseElement = document.getElementById(`response-${questionId}`);
+    let responseMd = "";
 
     const streamResponse = await fetch(streamUrl, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ id_pergunta: perguntaId }),
+      body: new URLSearchParams({ question_id: questionId }),
     });
 
     typingWrap.remove();
@@ -210,13 +210,13 @@
       if (done) break;
       if (!value) continue;
 
-      respostaMd += decoder.decode(value, { stream: true });
-      renderMarkdown(respostaElemento, respostaMd);
+      responseMd += decoder.decode(value, { stream: true });
+      renderMarkdown(responseElement, responseMd);
       scrollMessages();
     }
 
-    respostaMd += decoder.decode();
-    renderMarkdown(respostaElemento, respostaMd);
+    responseMd += decoder.decode();
+    renderMarkdown(responseElement, responseMd);
 
     scrollMessages();
   });

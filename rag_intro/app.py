@@ -9,17 +9,17 @@ from langchain_core.prompts import ChatPromptTemplate
 
 os.environ["OPENAI_API_KEY"] = config("OPENAI_API_KEY")
 
-caminho_pdf = "Perceptron.pdf"
+pdf_path = "Perceptron.pdf"
 
-loader = PyPDFLoader(caminho_pdf)
-documentos = loader.load()
+loader = PyPDFLoader(pdf_path)
+documents = loader.load()
 
 def train():
     splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
-    chunks = splitter.split_documents(documentos)
+    chunks = splitter.split_documents(documents)
 
     embeddings = OpenAIEmbeddings()
-    db_path = "banco_faiss"
+    db_path = "faiss_store"
     if os.path.exists(db_path):
         vectordb = FAISS.load_local(db_path, embeddings, allow_dangerous_deserialization=True)
         vectordb.add_documents(chunks)
@@ -29,30 +29,30 @@ def train():
     vectordb.save_local(db_path)
 
 
-def retrieval(pergunta):
+def retrieval(query):
     embeddings = OpenAIEmbeddings()
-    db_path = "banco_faiss"
+    db_path = "faiss_store"
     vectordb = FAISS.load_local(db_path, embeddings, allow_dangerous_deserialization=True)
-    docs = vectordb.similarity_search(pergunta, 4)
+    docs = vectordb.similarity_search(query, 4)
 
-    contexto = "\n\n".join([
+    context = "\n\n".join([
             f"Material: {doc.page_content}"
             for doc in docs
         ])
-    
+
     prompt = ChatPromptTemplate.from_template(
         "Você é um assistente especializado.\n"
         "Responda a pergunta do usuário SOMENTE com base no contexto abaixo.\n"
         "Se não houver informação suficiente, diga isso claramente.\n\n"
-        "Contexto:\n{contexto}\n\n"
-        "Pergunta: {pergunta}\n\n"
+        "Contexto:\n{context}\n\n"
+        "Pergunta: {query}\n\n"
     )
 
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
     chain = prompt | llm
-    resposta = chain.invoke({"contexto": contexto, "pergunta": pergunta})
-    return resposta.content
+    response = chain.invoke({"context": context, "query": query})
+    return response.content
 
 
 if __name__ == "__main__":
@@ -61,8 +61,8 @@ if __name__ == "__main__":
     print("Treinamento concluído.\n")
 
     while True:
-        pergunta = input("Pergunta (ou 'sair'): ").strip()
-        if pergunta.lower() == "sair":
+        query = input("Pergunta (ou 'sair'): ").strip()
+        if query.lower() == "sair":
             break
-        resposta = retrieval(pergunta)
-        print(f"\nResposta: {resposta}\n")
+        response = retrieval(query)
+        print(f"\nResposta: {response}\n")

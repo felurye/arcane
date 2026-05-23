@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_head %}
-    <link rel="stylesheet" href="{% static 'users/css/clientes.css' %}">
+    <link rel="stylesheet" href="{% static 'users/css/clients.css' %}">
 {% endblock %}
 
 {% block navbar %}
@@ -27,7 +27,7 @@
                     Clientes <em>& seus pets</em>.
                 </h1>
                 <p class="sub">
-                    {{ clientes.count }} tutores cadastrados. Use a busca para encontrar alguem rapidamente ou cadastre um novo paciente.
+                    {{ clients.count }} tutores cadastrados. Use a busca para encontrar alguem rapidamente ou cadastre um novo paciente.
                 </p>
                 {% if messages %}
                     {% for message in messages %}<div class="mb-6 rounded-xl p-4 {{ message.tags }}">{{ message }}</div>{% endfor %}
@@ -66,16 +66,16 @@
                     </tr>
                 </thead>
                 <tbody id="tbody">
-                    {% for cliente in clientes %}
-                        <tr onclick="window.location='{% url 'patient' cliente.pk %}'" style="cursor:pointer">
+                    {% for client in clients %}
+                        <tr onclick="window.location='{% url 'patient' client.pk %}'" style="cursor:pointer">
                             <td class="tutor">
                                 <div class="cell-inline">
-                                    <div class="a">{{ cliente.nome|slice:":1"|upper }}</div>
+                                    <div class="a">{{ client.name|slice:":1"|upper }}</div>
                                     <div class="text-inline">
                                         <div class="n">
-                                            <a href="{% url 'patient' cliente.pk %}">{{ cliente.nome }}</a>
+                                            <a href="{% url 'patient' client.pk %}">{{ client.name }}</a>
                                         </div>
-                                        <div class="m">{{ cliente.cpf }}</div>
+                                        <div class="m">{{ client.cpf }}</div>
                                     </div>
                                 </div>
                             </td>
@@ -89,15 +89,15 @@
                                         </svg>
                                     </div>
                                     <div>
-                                        <a href="{% url 'patient' cliente.pk %}" class="pn">{{ cliente.nome_animal }}</a>
-                                        <div class="pm">{{ cliente.get_especie_display }}</div>
+                                        <a href="{% url 'patient' client.pk %}" class="pn">{{ client.animal_name }}</a>
+                                        <div class="pm">{{ client.get_species_display }}</div>
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                {{ cliente.raca }} · <span style="color:var(--ink-mute)">{{ cliente.idade }} anos</span>
+                                {{ client.breed }} · <span style="color:var(--ink-mute)">{{ client.age }} anos</span>
                             </td>
-                            <td class="mono">{{ cliente.telefone }}</td>
+                            <td class="mono">{{ client.phone }}</td>
                             <td class="actions">
                                 <button class="act-btn" title="Excluir" type="button">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -120,7 +120,7 @@
                 </tbody>
             </table>
             <div class="table-foot">
-                <span id="rowCount">{{ clientes.count }} clientes</span>
+                <span id="rowCount">{{ clients.count }} clientes</span>
             </div>
         </div>
     </main>
@@ -147,7 +147,7 @@
                     <div class="grid g-2">
                         <div class="field span-2">
                             <label>Nome completo do tutor</label>
-                            <input type="text" name="nome" placeholder="Ex: Mariana Oliveira">
+                            <input type="text" name="name" placeholder="Ex: Mariana Oliveira">
                         </div>
                         <div class="field">
                             <label>CPF</label>
@@ -155,7 +155,7 @@
                         </div>
                         <div class="field">
                             <label>Telefone</label>
-                            <input type="tel" name="telefone" placeholder="(00) 00000-0000">
+                            <input type="tel" name="phone" placeholder="(00) 00000-0000">
                         </div>
                     </div>
                 </div>
@@ -165,7 +165,7 @@
                         <label>Especie</label>
                         <div class="species-toggle">
                             <label class="species-opt">
-                                <input type="radio" name="especie" value="C" checked>
+                                <input type="radio" name="species" value="C" checked>
                                 <div class="iconbox">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
                                         <path d="M4 11c0-3 1.5-5 3-5 1 0 2 .5 2.5 1.5C10.5 6 11.7 5 13 5s2.5 1 3 2.5C16.5 6.5 17.5 6 18.5 6c1.5 0 3 2 3 5 0 4-2 6-4 7v3h-2v-2H9v2H7v-3c-2-1-3-3-3-7Z" />
@@ -176,7 +176,7 @@
                                 <div><b>Cachorro</b><span>Canino</span></div>
                             </label>
                             <label class="species-opt">
-                                <input type="radio" name="especie" value="G">
+                                <input type="radio" name="species" value="G">
                                 <div class="iconbox">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
                                         <path d="M5 6 7.5 10M19 6l-2.5 4M4.5 13c0-4 3-7 7.5-7s7.5 3 7.5 7v4c0 2-1.5 3-3 3h-9c-1.5 0-3-1-3-3v-4Z" />
@@ -192,19 +192,19 @@
                     <div class="grid g-2">
                         <div class="field">
                             <label>Nome do animal</label>
-                            <input type="text" name="nome_animal" placeholder="Ex: Bento">
+                            <input type="text" name="animal_name" placeholder="Ex: Bento">
                         </div>
                         <div class="field">
                             <label>Raca</label>
-                            <input type="text" name="raca" placeholder="Ex: Golden Retriever">
+                            <input type="text" name="breed" placeholder="Ex: Golden Retriever">
                         </div>
                         <div class="field">
                             <label>Idade</label>
-                            <input type="number" name="idade" placeholder="0">
+                            <input type="number" name="age" placeholder="0">
                         </div>
                         <div class="field">
                             <label>Peso (kg)</label>
-                            <input type="number" name="peso" placeholder="0.0">
+                            <input type="number" name="weight" placeholder="0.0">
                         </div>
                     </div>
                 </div>

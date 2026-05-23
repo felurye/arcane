@@ -19,7 +19,7 @@ from django.conf import settings
 from tzlocal import get_localzone_name
 
 from prompts.prompt import SUMMARY_PROMPT, EXAM_ANALYSIS_PROMPT
-from .tools import buscar_eventos_adversos_veterinarios
+from .tools import search_adverse_veterinary_events
 
 load_dotenv()
 
@@ -28,52 +28,52 @@ SKILLS_DIR = Path(__file__).parent / "skills"
 
 # --- Triage Agent ---
 
-class TriagemResponse(BaseModel):
-    cor: str = Field(description="A cor da triagem: verde, amarelo, laranja, vermelho")
+class TriageResponse(BaseModel):
+    color: str = Field(description="Triage color: green, yellow, orange, red")
 
 
-class TriagemAgent:
+class TriageAgent:
 
     @classmethod
     def build_agent(cls):
         return Agent(
-            name="TriagemAgent",
+            name="TriageAgent",
             model=OpenAIResponses(id="gpt-4o-mini"),
             description=(
                 "Realiza a triagem de um paciente com base nos dados de entrada; "
                 "use a skill triagem para realizar a triagem."
             ),
-            instructions=["Use a skill triagem-veterinaria para realizar a triagem."],
-            output_schema=TriagemResponse,
+            instructions=["Use a skill veterinary-triage para realizar a triagem."],
+            output_schema=TriageResponse,
             skills=Skills(loaders=[LocalSkills(str(SKILLS_DIR))]),
         )
 
     @classmethod
-    def mount_prompt(cls, frequencia_cardiaca, frequencia_respiratoria, temperatura, peso, queixa, observacao):
+    def mount_prompt(cls, heart_rate, respiratory_rate, temperature, weight, complaint, observation):
         return f"""
-            Frequencia Cardiaca: {frequencia_cardiaca} bpm
-            Frequencia Respiratoria: {frequencia_respiratoria} mpm
-            Temperatura: {temperatura} °C
-            Peso: {peso} kg
-            Queixa: {queixa}
-            Observacao: {observacao}
+            Frequencia Cardiaca: {heart_rate} bpm
+            Frequencia Respiratoria: {respiratory_rate} mpm
+            Temperatura: {temperature} °C
+            Peso: {weight} kg
+            Queixa: {complaint}
+            Observacao: {observation}
         """
 
 
 # --- Summary and Exam Analysis Agents ---
 
 class Summaries(BaseModel):
-    summaries: str = Field(description='Resumo')
+    summaries: str = Field(description='Summary')
 
 
 class ExamAnalyses(BaseModel):
-    analyses: list[str] = Field(description='Lista de análises')
+    analyses: list[str] = Field(description='List of analyses')
 
 
 class BaseAgent:
     llm = ChatOpenAI(model_name='gpt-4o-mini', openai_api_key=settings.OPENAI_API_KEY)
     language: str = 'pt-br'
-    audience: str = 'Veterinario'
+    audience: str = 'Veterinarian'
 
     @abstractmethod
     def _prompt(self): ...
@@ -109,11 +109,11 @@ class ExamAnalysisAgent(BaseAgent):
 # --- Assistant Agent (RAG) ---
 
 class AssistantAgent:
-    VECTOR_DB_TABLE = "documentos"
+    VECTOR_DB_TABLE = "documents"
     VECTOR_DB_URI = "lancedb"
     MEMORY_DB_FILE = "db.sqlite3"
     MEMORY_TABLE = "my_memory_table"
-    AGENT_NAME = "Assistente Veterinario Virtual"
+    AGENT_NAME = "Virtual Veterinary Assistant"
     AGENT_DESCRIPTION = (
         "Assistente virtual especializado em consultas veterinarias "
         "use a base de conhecimento de consultas veterinarias"
@@ -131,7 +131,7 @@ class AssistantAgent:
     - Se não tiver certeza sobre alguma informação, indique isso ao usuário.
     - Mantenha um tom profissional e objetivo em todas as respostas.
     - Sempre devolva a resposta em markdown
-    - Sempre que solicitado informacoes sobre medicamentos ou principios ativos, use a tools buscar_eventos_adversos_veterinarios para consultar no FDA.
+    - Sempre que solicitado informacoes sobre medicamentos ou principios ativos, use a tool search_adverse_veterinary_events para consultar no FDA.
     - Quando buscar informacoes sobre medicamentos ou principios ativos, nunca devolva a resposta da API traga a sua interpretacao dos dados com o contexto da pergunta.
     """
 
@@ -156,7 +156,7 @@ class AssistantAgent:
             description=cls.AGENT_DESCRIPTION,
             instructions=cls.INSTRUCTIONS,
             db=db,
-            tools=[buscar_eventos_adversos_veterinarios],
+            tools=[search_adverse_veterinary_events],
             update_memory_on_run=True,
             knowledge=cls.knowledge,
             knowledge_filters=knowledge_filters,
@@ -167,12 +167,12 @@ class AssistantAgent:
 
 # --- Secretary Agent (WhatsApp) ---
 
-class SecretariaAI:
+class SecretaryAI:
     CREDENTIALS_PATH = settings.BASE_DIR / "client_secret_850364294536-n0snuu77gar2k1reh738vfa2p5jqv7nd.apps.googleusercontent.com.json"
     VECTOR_DB_TABLE = "empresa"
     VECTOR_DB_URI = "lancedb"
     MEMORY_DB_FILE = "db.sqlite3"
-    MEMORY_TABLE = "secretaria_memory_table"
+    MEMORY_TABLE = "secretary_memory_table"
 
     INSTRUCTIONS = f"""
     Você é a secretária virtual de um hospital veterinário. Seu papel é agendar consultas para possíveis pacientes.
@@ -221,8 +221,8 @@ class SecretariaAI:
         )
 
         return Agent(
-            name="Assistente de Secretaria Virtual",
-            description="Assistente virtual para atendimento ao cliente e agendamento de reuniões",
+            name="Virtual Secretary Assistant",
+            description="Virtual assistant for client service and appointment scheduling",
             model=OpenAIChat(id="gpt-4o-mini"),
             tools=[GoogleCalendarTools(
                 credentials_path=str(cls.CREDENTIALS_PATH),

@@ -2,7 +2,7 @@ import requests
 from urllib.parse import urlencode, urljoin
 
 
-class BaseEVolutionAPI:
+class BaseEvolutionAPI:
 
     def __init__(self):
         self._BASE_URL = 'http://exemplo.com.br'
@@ -44,7 +44,7 @@ class BaseEVolutionAPI:
         return path.strip('/').split('/')[-1]
 
 
-class SendMessage(BaseEVolutionAPI):
+class SendMessage(BaseEvolutionAPI):
 
     def send_message(self, instance, body):
         path = f'/message/sendText/{instance}/'

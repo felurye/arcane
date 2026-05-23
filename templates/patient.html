@@ -2,8 +2,8 @@
 {% load static %}
 
 {% block extra_head %}
-    <link rel="stylesheet" href="{% static 'users/css/clientes.css' %}">
-    <link rel="stylesheet" href="{% static 'users/css/paciente.css' %}">
+    <link rel="stylesheet" href="{% static 'users/css/clients.css' %}">
+    <link rel="stylesheet" href="{% static 'users/css/patient.css' %}">
 {% endblock %}
 
 {% block navbar %}
@@ -21,35 +21,35 @@
             <div class="crumbs">
                 <a href="{% url 'clients' %}">Clinica</a> <span class="sep">/</span>
                 <a href="{% url 'clients' %}">Clientes</a> <span class="sep">/</span>
-                <span class="here">{{ cliente.nome_animal|default:"Paciente" }}</span>
+                <span class="here">{{ client.animal_name|default:"Paciente" }}</span>
             </div>
         </div>
         <header class="hero">
             <div class="hero-l">
-                <div class="avt-big">{{ cliente.nome_animal|slice:":1"|upper|default:"P" }}</div>
+                <div class="avt-big">{{ client.animal_name|slice:":1"|upper|default:"P" }}</div>
                 <div class="hero-info">
                     <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--clay)">
-                        Paciente · PET-{{ cliente.id }}
+                        Paciente · PET-{{ client.id }}
                     </div>
                     <h1>
-                        {{ cliente.nome_animal }} <em>{{ cliente.nome }}</em>
+                        {{ client.animal_name }} <em>{{ client.name }}</em>
                     </h1>
                     <div class="pet-meta">
                         <span class="meta-chip">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
                                 <path d="M4 11c0-3 1.5-5 3-5 1 0 2 .5 2.5 1.5C10.5 6 11.7 5 13 5s2.5 1 3 2.5C16.5 6.5 17.5 6 18.5 6c1.5 0 3 2 3 5 0 4-2 6-4 7v3h-2v-2H9v2H7v-3c-2-1-3-3-3-7Z" />
                             </svg>
-                            {{ cliente.get_especie_display }} {{ cliente.raca }}
+                            {{ client.get_species_display }} {{ client.breed }}
                         </span>
-                        {% if cliente.idade %}<span class="meta-chip">{{ cliente.idade }} anos</span>{% endif %}
-                        {% if cliente.peso %}<span class="meta-chip">{{ cliente.peso|floatformat:1 }} kg</span>{% endif %}
+                        {% if client.age %}<span class="meta-chip">{{ client.age }} anos</span>{% endif %}
+                        {% if client.weight %}<span class="meta-chip">{{ client.weight|floatformat:1 }} kg</span>{% endif %}
                     </div>
                     <div class="tutor-line">
-                        <div class="av-sm">{{ cliente.nome|slice:":1"|upper }}</div>
-                        <span>Tutor <b>{{ cliente.nome }}</b></span>
-                        {% if cliente.telefone %}
+                        <div class="av-sm">{{ client.name|slice:":1"|upper }}</div>
+                        <span>Tutor <b>{{ client.name }}</b></span>
+                        {% if client.phone %}
                             <span class="dot"></span>
-                            <span class="phone">{{ cliente.telefone }}</span>
+                            <span class="phone">{{ client.phone }}</span>
                         {% endif %}
                     </div>
                 </div>
@@ -61,24 +61,24 @@
                     </svg>
                     Realizar triagem
                 </button>
-                <a href="{% url 'chat' cliente.pk %}" class="chat-btn">
+                <a href="{% url 'chat' client.pk %}" class="chat-btn">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                     </svg>
                     Abrir chat
                 </a>
-                {% if cliente.triagem %}
+                {% if client.triage %}
                 <div class="urgency-row">
-                    <label class="urgency u1 opacity-30 {% if cliente.triagem == 'verde' %}opacity-100{% endif %}">
+                    <label class="urgency u1 opacity-30 {% if client.triage == 'green' %}opacity-100{% endif %}">
                         <span class="dt"></span><b>Verde</b>
                     </label>
-                    <label class="urgency u2 opacity-30 {% if cliente.triagem == 'amarelo' %}opacity-100{% endif %}">
+                    <label class="urgency u2 opacity-30 {% if client.triage == 'yellow' %}opacity-100{% endif %}">
                         <span class="dt"></span><b>Amarelo</b>
                     </label>
-                    <label class="urgency u3 opacity-30 {% if cliente.triagem == 'laranja' %}opacity-100{% endif %}">
+                    <label class="urgency u3 opacity-30 {% if client.triage == 'orange' %}opacity-100{% endif %}">
                         <span class="dt"></span><b>Laranja</b>
                     </label>
-                    <label class="urgency u4 opacity-30 {% if cliente.triagem == 'vermelho' %}opacity-100{% endif %}">
+                    <label class="urgency u4 opacity-30 {% if client.triage == 'red' %}opacity-100{% endif %}">
                         <span class="dt"></span><b>Vermelho</b>
                     </label>
                 </div>
@@ -98,21 +98,21 @@
             </button>
         </div>
         <div class="timeline" id="timeline">
-            {% for consulta in consultas %}
+            {% for appointment in appointments %}
                 <article class="consult">
-                    {% if consulta.video %}
-                        <video class="consult-video" controls preload="metadata" playsinline src="{{ consulta.video.url }}">
+                    {% if appointment.video %}
+                        <video class="consult-video" controls preload="metadata" playsinline src="{{ appointment.video.url }}">
                             Seu navegador nao suporta reproducao de video.
                         </video>
                     {% endif %}
                     <div class="consult-body">
                         <div class="consult-head">
                             <div>
-                                <h3><a href="{% url 'appointment' consulta.pk %}">Consulta · {{ consulta.data|date:'d/m/Y' }}</a></h3>
+                                <h3><a href="{% url 'appointment' appointment.pk %}">Consulta · {{ appointment.date|date:'d/m/Y' }}</a></h3>
                             </div>
                         </div>
-                        <p class="consult-notes">{{ consulta.observacao }}</p>
-                        {% if consulta.pdf %}
+                        <p class="consult-notes">{{ appointment.observation }}</p>
+                        {% if appointment.pdf %}
                             <div class="exams">
                                 <span class="exams-label">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
@@ -121,7 +121,7 @@
                                     </svg>
                                     Exames anexados
                                 </span>
-                                <a href="{{ consulta.pdf.url }}" target="_blank">
+                                <a href="{{ appointment.pdf.url }}" target="_blank">
                                     <div class="exam">
                                         <div class="ico">
                                             <svg viewBox="0 0 24 24" fill="currentColor">
@@ -129,7 +129,7 @@
                                                 <text x="7" y="17" font-size="6" font-family="monospace" font-weight="700" fill="currentColor">PDF</text>
                                             </svg>
                                         </div>
-                                        <div class="nm">{{ consulta.pdf.name }}</div>
+                                        <div class="nm">{{ appointment.pdf.name }}</div>
                                         <button class="dl" type="button">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
                                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
@@ -151,7 +151,7 @@
         <div class="modal pb-10" role="dialog" aria-labelledby="newConsultTitle">
             <header class="modal-head">
                 <div>
-                    <div class="eyebrow">{{ cliente.nome_animal }} · {{ cliente.nome }}</div>
+                    <div class="eyebrow">{{ client.animal_name }} · {{ client.name }}</div>
                     <h2 id="newConsultTitle">Nova <em>consulta</em>.</h2>
                     <p>Cadastre os dados clinicos, anexe o video do atendimento e os exames em PDF.</p>
                 </div>
@@ -161,14 +161,14 @@
                     </svg>
                 </button>
             </header>
-            <form class="modal-body" enctype="multipart/form-data" method="post" action="{% url 'patient' cliente.id %}">
+            <form class="modal-body" enctype="multipart/form-data" method="post" action="{% url 'patient' client.id %}">
                 {% csrf_token %}
                 <div class="form-section">
                     <h3>01 · Informacoes da consulta</h3>
                     <div class="grid g-2">
                         <div class="field" style="grid-column:span 2">
                             <label>Evolucao clinica & observacoes</label>
-                            <textarea name="observacao" rows="4" placeholder="Anamnese, exame fisico, conduta…" required></textarea>
+                            <textarea name="observation" rows="4" placeholder="Anamnese, exame fisico, conduta…" required></textarea>
                         </div>
                     </div>
                 </div>
@@ -211,7 +211,7 @@
     <aside class="triage-drawer" id="triageDrawer" role="dialog" aria-labelledby="triageTitle">
         <header class="triage-head">
             <div>
-                <div class="eyebrow" style="color:rgba(255,255,255,.7)">Triagem rapida · {{ cliente.nome_animal }}</div>
+                <div class="eyebrow" style="color:rgba(255,255,255,.7)">Triagem rapida · {{ client.animal_name }}</div>
                 <h2 id="triageTitle">Avaliacao <em>de chegada</em>.</h2>
                 <p>Sinais vitais e classificacao de urgencia antes do atendimento.</p>
             </div>
@@ -221,7 +221,7 @@
                 </svg>
             </button>
         </header>
-        <form method="post" action="{% url 'triage' cliente.id %}">{% csrf_token %}
+        <form method="post" action="{% url 'triage' client.id %}">{% csrf_token %}
             <div class="triage-body">
                 <div>
                     <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-mute);display:block;margin-bottom:10px">
@@ -236,36 +236,36 @@
                         <div class="vital">
                             <label>Frequencia cardiaca</label>
                             <div class="suffix" data-unit="bpm">
-                                <input type="number" name="frequencia_cardiaca" value="98">
+                                <input type="number" name="heart_rate" value="98">
                             </div>
                         </div>
                         <div class="vital">
                             <label>Frequencia respiratoria</label>
                             <div class="suffix" data-unit="mpm">
-                                <input type="number" name="frequencia_respiratoria" value="22">
+                                <input type="number" name="respiratory_rate" value="22">
                             </div>
                         </div>
                         <div class="vital">
                             <label>Temperatura</label>
                             <div class="suffix" data-unit="°C">
-                                <input type="number" name="temperatura" step="0.1" value="38.7">
+                                <input type="number" name="temperature" step="0.1" value="38.7">
                             </div>
                         </div>
                         <div class="vital">
                             <label>Peso atual</label>
                             <div class="suffix" data-unit="kg">
-                                <input type="number" name="peso" step="0.1">
+                                <input type="number" name="weight" step="0.1">
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="field-block">
                     <label>Queixa principal do tutor</label>
-                    <textarea name="queixa" placeholder="Ex: vomito desde ontem, recusa de alimento…"></textarea>
+                    <textarea name="complaint" placeholder="Ex: vomito desde ontem, recusa de alimento…"></textarea>
                 </div>
                 <div class="field-block">
                     <label>Observacoes da triagem</label>
-                    <textarea name="observacao" placeholder="Estado geral, mucosas, hidratacao…"></textarea>
+                    <textarea name="observation" placeholder="Estado geral, mucosas, hidratacao…"></textarea>
                 </div>
             </div>
             <footer class="triage-foot">
