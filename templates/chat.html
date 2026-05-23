@@ -81,16 +81,144 @@
 {% endblock %}
 
 {% block extra_scripts %}
-    <script>
-        function autosize(el) {
-            el.style.height = "auto";
-            el.style.height = el.scrollHeight + "px";
-        }
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+  const userInitial = "{% if user.is_authenticated %}{{ user.username|slice:':1'|upper }}{% else %}V{% endif %}";
+  const streamUrl = "{% url 'stream_response' %}";
+  const fontesUrlBase = "{% url 'sources' 0 %}";
+  function fontesUrl(perguntaId) {
+    return fontesUrlBase.replace("/0/", "/" + perguntaId + "/");
+  }
 
-        function toggleSend() {
-            const btn = document.getElementById("sendBtn");
-            const val = document.getElementById("pergunta").value.trim();
-            btn.disabled = val.length === 0;
-        }
-    </script>
+  marked.setOptions({ breaks: true, gfm: true });
+
+  function renderMarkdown(el, raw) {
+    el.innerHTML = marked.parse(raw || "");
+  }
+
+  function now() {
+    const d = new Date();
+    return d.getHours().toString().padStart(2, "0") + ":" + d.getMinutes().toString().padStart(2, "0");
+  }
+
+  function autosize(el) {
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 160) + "px";
+  }
+
+  function toggleSend() {
+    const ta = document.getElementById("pergunta");
+    const btn = document.getElementById("sendBtn");
+    btn.disabled = !ta.value.trim();
+  }
+
+  function scrollMessages() {
+    const messages = document.getElementById("messages");
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  document.getElementById("form-pergunta").addEventListener("submit", async function (event) {
+    event.preventDefault();
+    const input = document.getElementById("pergunta");
+    const pergunta = input.value.trim();
+    if (!pergunta) return;
+
+    const messages = document.getElementById("messages");
+
+    const userWrap = document.createElement("div");
+    userWrap.className = "msg-wrap";
+    userWrap.innerHTML = `
+      <div class="msg user">
+        <div class="msg-body">
+          <div class="msg-meta">
+            <span class="msg-badge msg-badge--pergunta">Pergunta</span>
+            <b>Voce</b>
+            <span class="ts">${now()}</span>
+          </div>
+          <div class="bubble"><p></p></div>
+        </div>
+        <div class="msg-avt user">${userInitial}</div>
+      </div>`;
+    userWrap.querySelector(".bubble p").textContent = pergunta;
+    messages.appendChild(userWrap);
+
+    input.value = "";
+
+    const formData = new FormData();
+    formData.append("pergunta", pergunta);
+    const response = await fetch(window.location.href, { method: "POST", body: formData });
+    const data = await response.json();
+    const perguntaId = data.id;
+
+    const typingWrap = document.createElement("div");
+    typingWrap.className = "msg-wrap typing";
+    typingWrap.innerHTML = `
+      <div class="msg">
+        <div class="msg-avt">P</div>
+        <div class="msg-body">
+          <div class="msg-meta">
+            <span class="msg-badge msg-badge--resposta">Resposta</span>
+            <b>Petcare IA</b>
+            <span class="ts">${now()}</span>
+          </div>
+          <div class="bubble"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+        </div>
+      </div>`;
+    messages.appendChild(typingWrap);
+
+    const botWrap = document.createElement("div");
+    botWrap.className = "msg-wrap";
+    botWrap.style.display = "none";
+    botWrap.innerHTML = `
+      <div class="msg">
+        <div class="msg-avt">P</div>
+        <div class="msg-body">
+          <div class="msg-meta">
+            <span class="msg-badge msg-badge--resposta">Resposta</span>
+            <b>Petcare IA</b>
+            <span class="ts">${now()}</span>
+          </div>
+          <div class="bubble markdown"><div class="md-body" id="resposta-${perguntaId}"></div></div>
+          <div class="msg-foot">
+            <a class="link" href="${fontesUrl(perguntaId)}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 1 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7L12 19"/></svg>
+              Confira as fontes
+            </a>
+            <span class="ctx-chip" style="background:#FBEDD2;border-color:#EBCF93;color:#8B5E1F">IA · clinical-v2</span>
+          </div>
+        </div>
+      </div>`;
+    messages.appendChild(botWrap);
+
+    const respostaElemento = document.getElementById(`resposta-${perguntaId}`);
+    let respostaMd = "";
+
+    const streamResponse = await fetch(streamUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ id_pergunta: perguntaId }),
+    });
+
+    typingWrap.remove();
+    botWrap.style.display = "";
+
+    const reader = streamResponse.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+
+      respostaMd += decoder.decode(value, { stream: true });
+      renderMarkdown(respostaElemento, respostaMd);
+      scrollMessages();
+    }
+
+    respostaMd += decoder.decode();
+    renderMarkdown(respostaElemento, respostaMd);
+
+    scrollMessages();
+  });
+</script>
 {% endblock %}

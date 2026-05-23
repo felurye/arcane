@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 
+from decouple import config
 from django.contrib.messages import constants as message_constants
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users',
+    'django_q',
 ]
 
 MIDDLEWARE = [
@@ -78,6 +80,17 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
+
+Q_CLUSTER = {
+    "name": "pythonando",
+    "workers": 1,
+    "retry": 200,
+    "timeout": 180,
+    "queue_limit": 50,
+    "orm": "default",
+}
 
 MESSAGE_TAGS = {
     message_constants.SUCCESS: 'bg-green-50 text-green-700',

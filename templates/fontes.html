@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'users/css/clientes.css' %}">
+    <link rel="stylesheet" href="{% static 'users/css/fontes.css' %}">
+{% endblock %}
+
+{% block navbar %}
+    {% include "partials/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<main>
+    <div class="topbar">
+        <button class="icon-btn mobile-nav-btn" type="button" aria-label="Abrir menu" onclick="openSidebar()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+        <div class="crumbs">
+            <a href="{% url 'clients' %}">Clinica</a> <span class="sep">/</span>
+            <a href="{% url 'patient' cliente.pk %}">{{ cliente.nome_animal|default:"Paciente" }}</a> <span class="sep">/</span>
+            <a href="{% url 'chat' cliente.pk %}">Assistente IA</a> <span class="sep">/</span>
+            <span class="here">Fontes da resposta</span>
+        </div>
+        <a href="{% url 'chat' cliente.pk %}" class="back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Voltar para o chat
+        </a>
+    </div>
+
+    <header class="head">
+        <span class="eyebrow">RAG · {{ cliente.nome_animal|default:"Paciente" }}</span>
+        <h1 class="title">Fontes <em>desta resposta</em>.</h1>
+    </header>
+
+    <section class="ask">
+        <div class="who-row">
+            <div class="avt">{% if user.is_authenticated %}{{ user.username|slice:":1"|upper }}{% else %}V{% endif %}</div>
+            <div class="q">
+                <span>Pergunta · {% if user.is_authenticated %}{{ user.first_name|default:user.username }}{% else %}Veterinario{% endif %} · {{ pergunta.id }}</span>
+                <b>{{ pergunta.pergunta }}</b>
+            </div>
+        </div>
+        <div class="stats">
+            <div>
+                <b>{{ total_fontes }}</b>
+                fonte{{ total_fontes|pluralize }}
+            </div>
+        </div>
+    </section>
+
+    <section class="sources-grid" id="sourcesGrid">
+        {% for contexto in contextos %}
+        <article class="src" data-type="rag">
+            <header class="src-head">
+                <span class="num">{{ forloop.counter }}</span>
+                <div class="src-meta">
+                    <span class="src-type">Base de conhecimento · {{ contexto.tool_name }}</span>
+                    <h3>{{ contexto.tool_name }}</h3>
+                </div>
+                <span class="score">RAG</span>
+            </header>
+            <div class="excerpt">
+                <div class="excerpt-label">
+                    <span>Trecho recuperado</span>
+                </div>
+                <div class="excerpt-raw">{{ contexto.content }}</div>
+            </div>
+            {% if contexto.tool_args %}
+            <div class="excerpt">
+                <div class="excerpt-label"><span>Argumentos da busca</span></div>
+                <div class="excerpt-raw">{{ contexto.tool_args }}</div>
+            </div>
+            {% endif %}
+            <div class="src-foot">
+                <span class="meta">Contexto #{{ contexto.id }} · pergunta #{{ pergunta.id }}</span>
+            </div>
+        </article>
+        {% empty %}
+        <div class="fontes-empty">
+            Nenhuma fonte RAG registrada ainda.
+            <p>Os contextos aparecem aqui quando a IA consulta a base de conhecimento durante a resposta.</p>
+        </div>
+        {% endfor %}
+    </section>
+</main>
+{% endblock %}

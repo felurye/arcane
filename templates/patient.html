@@ -67,6 +67,22 @@
                     </svg>
                     Abrir chat
                 </a>
+                {% if cliente.triagem %}
+                <div class="urgency-row">
+                    <label class="urgency u1 opacity-30 {% if cliente.triagem == 'verde' %}opacity-100{% endif %}">
+                        <span class="dt"></span><b>Verde</b>
+                    </label>
+                    <label class="urgency u2 opacity-30 {% if cliente.triagem == 'amarelo' %}opacity-100{% endif %}">
+                        <span class="dt"></span><b>Amarelo</b>
+                    </label>
+                    <label class="urgency u3 opacity-30 {% if cliente.triagem == 'laranja' %}opacity-100{% endif %}">
+                        <span class="dt"></span><b>Laranja</b>
+                    </label>
+                    <label class="urgency u4 opacity-30 {% if cliente.triagem == 'vermelho' %}opacity-100{% endif %}">
+                        <span class="dt"></span><b>Vermelho</b>
+                    </label>
+                </div>
+                {% endif %}
             </div>
         </header>
         <div class="sec-head">
@@ -205,8 +221,7 @@
                 </svg>
             </button>
         </header>
-        <form method="post" action="#">
-            {% csrf_token %}
+        <form method="post" action="{% url 'triage' cliente.id %}">{% csrf_token %}
             <div class="triage-body">
                 <div>
                     <label style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-mute);display:block;margin-bottom:10px">
